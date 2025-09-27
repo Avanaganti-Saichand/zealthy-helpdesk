@@ -4,17 +4,33 @@ import {
   Text,
   StyleSheet,
   TextInput,
-  Button,
   Image,
   Alert,
   Platform,
   ActivityIndicator,
+  ScrollView,
+  Pressable,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 
-// const API_BASE = "http://localhost:4000"; // LOCAL testing
-
 const API_BASE = "https://zealthy-helpdesk-m8le.onrender.com";
+
+function PrimaryButton({ title, onPress, disabled }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      style={({ pressed }) => [
+        styles.btn,
+        disabled && { opacity: 0.6 },
+        pressed && { transform: [{ scale: 0.98 }] },
+      ]}
+    >
+      <Text style={styles.btnText}>{title}</Text>
+    </Pressable>
+  );
+}
 
 export default function SubmitScreen() {
   const [name, setName] = useState("");
@@ -90,7 +106,6 @@ export default function SubmitScreen() {
 
       if (photo) {
         if (Platform.OS === "web") {
-          // Convert blob: URL to real File on web
           const resp = await fetch(photo.uri);
           const blob = await resp.blob();
           const file = new File([blob], photo.fileName, {
@@ -98,7 +113,6 @@ export default function SubmitScreen() {
           });
           form.append("attachment", file, photo.fileName);
         } else {
-          // Native
           form.append("attachment", {
             uri: photo.uri,
             name: photo.fileName,
@@ -107,10 +121,9 @@ export default function SubmitScreen() {
         }
       }
 
-      // IMPORTANT: don't set Content-Type; browser/native will add boundary
       const res = await fetch(`${API_BASE}/api/tickets`, {
         method: "POST",
-        body: form,
+        body: form, // let browser/native set Content-Type with boundary
       });
 
       const data = await res.json().catch(() => ({}));
@@ -135,59 +148,103 @@ export default function SubmitScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Submit a Ticket</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={[styles.input, { height: 120 }]}
-        placeholder="Describe the problem"
-        value={desc}
-        onChangeText={setDesc}
-        multiline
-      />
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f6f7fb" }}
+      edges={["top"]}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.card}>
+          <Text style={styles.title}>Submit a Ticket</Text>
 
-      {photo && (
-        <Image
-          source={{ uri: photo.uri }}
-          style={{ width: 160, height: 160, marginBottom: 8, borderRadius: 8 }}
-        />
-      )}
+          <Text style={styles.label}>Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Your name"
+            value={name}
+            onChangeText={setName}
+          />
 
-      <View style={{ gap: 8 }}>
-        <Button title="Pick a Photo (optional)" onPress={pickImage} />
-        {submitting ? (
-          <View style={{ paddingVertical: 8 }}>
-            <ActivityIndicator />
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="you@example.com"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+
+          <Text style={styles.label}>Description</Text>
+          <TextInput
+            style={[styles.input, { height: 120 }]}
+            placeholder="Describe the problem"
+            value={desc}
+            onChangeText={setDesc}
+            multiline
+          />
+
+          {photo && (
+            <Image
+              source={{ uri: photo.uri }}
+              style={{
+                width: "100%",
+                height: 220,
+                marginBottom: 12,
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: "#e6e6e6",
+              }}
+              resizeMode="cover"
+            />
+          )}
+
+          <View style={{ gap: 10 }}>
+            <PrimaryButton
+              title="Pick a Photo (optional)"
+              onPress={pickImage}
+            />
+            {submitting ? (
+              <View style={{ paddingVertical: 12 }}>
+                <ActivityIndicator />
+              </View>
+            ) : (
+              <PrimaryButton title="Submit Ticket" onPress={submit} />
+            )}
           </View>
-        ) : (
-          <Button title="Submit" onPress={submit} />
-        )}
-      </View>
-    </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, gap: 12, backgroundColor: "#f7f7f7" },
-  title: { fontSize: 20, fontWeight: "600", marginVertical: 8 },
+  container: { padding: 16 },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    borderWidth: 1,
+    borderColor: "#ececec",
+    gap: 8,
+  },
+  title: { fontSize: 22, fontWeight: "700", marginBottom: 8 },
+  label: { fontSize: 13, color: "#555", marginTop: 6 },
   input: {
     backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
+    borderColor: "#ddd",
+    borderRadius: 10,
     padding: 10,
-    marginBottom: 8,
   },
+  btn: {
+    backgroundColor: "#3b82f6",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  btnText: { color: "#fff", fontWeight: "700" },
 });
