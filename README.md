@@ -78,21 +78,19 @@ Testing from a phone on the same Wi‑Fi: set API_BASE in the code to your PC’
 
 ## API Endpoints
 
-Base URL (production): https://zealthy-helpdesk-m8le.onrender.com
+**Base URL (production):**  
+https://zealthy-helpdesk-m8le.onrender.com
 
 | Method | Endpoint         | Description                                                                                    |
-| -----: | ---------------- | ---------------------------------------------------------------------------------------------- | ----------- | ---------------------------------- |
-|    GET | /api/health      | Health check, returns `{ ok: true }`.                                                          |
-|   POST | /api/tickets     | Create ticket. multipart/form-data with `name`, `email`, `description`, optional `attachment`. |
-|    GET | /api/tickets     | List all tickets.                                                                              |
-|    GET | /api/tickets/:id | Get a single ticket.                                                                           |
-|  PATCH | /api/tickets/:id | Update `status` (new                                                                           | in_progress | resolved) and/or `admin_response`. |
+| ------ | ---------------- | ---------------------------------------------------------------------------------------------- |
+| GET    | /api/health      | Health check, returns `{ ok: true }`                                                           |
+| POST   | /api/tickets     | Create ticket. multipart/form-data with `name`, `email`, `description`, optional `attachment`. |
+| GET    | /api/tickets     | List all tickets.                                                                              |
+| GET    | /api/tickets/:id | Get a single ticket.                                                                           |
+| PATCH  | /api/tickets/:id | Update `status` (`new` \| `in_progress` \| `resolved`) and/or `admin_response`.                |
 
-Uploads are served at:
-
-```
-https://<backend-domain>/uploads/<filename>
-```
+**Uploads** are served at:  
+`/uploads/<filename>`
 
 ## Project Structure
 
