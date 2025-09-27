@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import axios from "axios";
 
-const API_BASE = "http://localhost:4000";
+const API_BASE = "https://zealthy-helpdesk-m8le.onrender.com";
 
 export default function AdminScreen() {
   const [tickets, setTickets] = useState([]);

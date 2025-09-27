@@ -13,8 +13,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 
-// If you later test on phone, change localhost to your PC LAN IP
-const API_BASE = "http://localhost:4000";
+const API_BASE = "https://zealthy-helpdesk-m8le.onrender.com";
 
 export default function SubmitScreen() {
   const [name, setName] = useState("");
