@@ -13,6 +13,8 @@ import {
 } from "react-native";
 import axios from "axios";
 
+// const API_BASE = "http://localhost:4000"; // LOCAL testing
+
 const API_BASE = "https://zealthy-helpdesk-m8le.onrender.com";
 
 export default function AdminScreen() {
@@ -40,9 +42,7 @@ export default function AdminScreen() {
       const { data } = await axios.patch(
         `${API_BASE}/api/tickets/${selected.id}`,
         body,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
+        { headers: { "Content-Type": "application/json" } }
       );
       setSelected(data);
       setAdminResponse("");

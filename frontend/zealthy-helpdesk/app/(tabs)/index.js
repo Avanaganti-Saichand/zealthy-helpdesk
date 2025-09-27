@@ -11,7 +11,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import axios from "axios";
+
+// const API_BASE = "http://localhost:4000"; // LOCAL testing
 
 const API_BASE = "https://zealthy-helpdesk-m8le.onrender.com";
 
@@ -49,7 +50,6 @@ export default function SubmitScreen() {
     const n = name.trim();
     const e = email.trim();
     const d = desc.trim();
-
     if (!n || !e || !d) {
       Alert.alert(
         "Missing fields",
@@ -87,17 +87,39 @@ export default function SubmitScreen() {
       form.append("name", v.n);
       form.append("email", v.e);
       form.append("description", v.d);
+
       if (photo) {
-        form.append("attachment", {
-          uri: photo.uri,
-          name: photo.fileName,
-          type: photo.mimeType,
-        });
+        if (Platform.OS === "web") {
+          // Convert blob: URL to real File on web
+          const resp = await fetch(photo.uri);
+          const blob = await resp.blob();
+          const file = new File([blob], photo.fileName, {
+            type: photo.mimeType,
+          });
+          form.append("attachment", file, photo.fileName);
+        } else {
+          // Native
+          form.append("attachment", {
+            uri: photo.uri,
+            name: photo.fileName,
+            type: photo.mimeType,
+          });
+        }
       }
 
-      await axios.post(`${API_BASE}/api/tickets`, form, {
-        headers: { "Content-Type": "multipart/form-data" },
+      // IMPORTANT: don't set Content-Type; browser/native will add boundary
+      const res = await fetch(`${API_BASE}/api/tickets`, {
+        method: "POST",
+        body: form,
       });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg =
+          (data && (data.error || data.message)) || `HTTP ${res.status}`;
+        Alert.alert("Error", `Submit failed: ${msg}`);
+        return;
+      }
 
       Alert.alert("Submitted ✅", "Your ticket has been submitted.");
       setName("");
@@ -105,7 +127,7 @@ export default function SubmitScreen() {
       setDesc("");
       setPhoto(null);
     } catch (e) {
-      console.error(e);
+      console.error("submit error", e);
       Alert.alert("Error", "Could not submit ticket.");
     } finally {
       setSubmitting(false);
